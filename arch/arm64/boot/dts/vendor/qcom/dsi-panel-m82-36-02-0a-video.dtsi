@@ -72,7 +72,7 @@
        qcom,mdss-dsi-pan-enable-dynamic-fps;
       qcom,mdss-dsi-pan-fps-update =
                "dfps_immediate_porch_mode_vfp";
-       qcom,dsi-supported-dfps-list = <144 120 90 60>;
+       qcom,dsi-supported-dfps-list = <120 144 90 60 50 48 30>;
 
         qcom,mdss-dsi-display-timings {
             timing@0{
@@ -183,7 +183,7 @@
                         39 01 00 00 00 00 02 0F 6E
                         39 01 00 00 00 00 02 9D 0A
                         39 01 00 00 00 00 02 9E 0A
-                        39 01 00 00 00 00 02 17 00
+                        39 01 00 00 00 00 02 17 11
 
                         39 01 00 00 00 00 02 FF 22
                         39 01 00 00 00 00 02 FB 01
