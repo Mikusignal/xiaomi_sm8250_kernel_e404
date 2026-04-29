@@ -31,10 +31,6 @@
 #include "mi_disp_nvt_alpha_data.h"
 #include "mi_disp_lhbm.h"
 
-#ifdef CONFIG_E404_ATTRIBUTES
-#include <linux/e404_attributes.h>
-#endif
-
 #undef pr_info
 #undef pr_err
 #define pr_info pr_debug
@@ -318,19 +314,8 @@ static int dsi_panel_parse_smart_fps_config(struct dsi_panel *panel,
 
 	mi_cfg->idle_mode_flag = true;
 
-#ifdef CONFIG_E404_ATTRIBUTES
-	if (e404_data.rom_type == 2) {
-		mi_cfg->smart_fps_support = 0;
-		pr_alert("E404: forcing mi smart fps off for ur shitty stock rom\n");
-	 } else {
-		mi_cfg->smart_fps_support = utils->read_bool(of_node,
-			"mi,mdss-dsi-pan-enable-smart-fps");
-		pr_alert("E404: reading default mi smart fps\n");
-	}
-#else
 	mi_cfg->smart_fps_support = utils->read_bool(of_node,
 			"mi,mdss-dsi-pan-enable-smart-fps");
-#endif
 
 	if (mi_cfg->smart_fps_support) {
 		pr_info("smart fps is supported\n");
