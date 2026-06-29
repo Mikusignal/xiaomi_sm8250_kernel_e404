@@ -33,6 +33,7 @@ jobs:
 
       - name: Build Kernel
         run: |
+          git submodule update --init --recursive
           export ARCH=arm64
           export SUBARCH=arm64
           make O=out vendor/pipa_defconfig
