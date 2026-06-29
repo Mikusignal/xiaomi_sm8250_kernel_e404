@@ -1,0 +1,57 @@
+name: Build Kernel For Pipa
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y bc bison build-essential ccache curl flex git \
+            kmod libelf-dev libssl-dev libudev-dev libncurses-dev python3 \
+            unzip zip device-tree-compiler
+
+      - name: Install Clang
+        run: |
+          mkdir -p ${{ github.workspace }}/clang
+          wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-main-llvm-toolchain-source/clang-r547379.tar.gz -O clang.tar.gz
+          tar -xzf clang.tar.gz -C ${{ github.workspace }}/clang
+          echo "${{ github.workspace }}/clang/bin" >> $GITHUB_PATH
+
+      - name: Clone AnyKernel3
+        run: |
+          git clone https://github.com/osm0sis/AnyKernel3.git -b master --single-branch --depth=1
+
+      - name: Build Kernel
+        run: |
+          export ARCH=arm64
+          export SUBARCH=arm64
+          make O=out vendor/pipa_defconfig
+          make -j$(nproc) O=out CC=clang LLVM=1 LLVM_IAS=1 \
+            CROSS_COMPILE=aarch64-linux-gnu- \
+            CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
+
+      - name: Package with AnyKernel3
+        run: |
+          cp out/arch/arm64/boot/Image AnyKernel3/
+          cp out/arch/arm64/boot/dtbo.img AnyKernel3/ 2>/dev/null || true
+          cp out/arch/arm64/boot/dtb AnyKernel3/ 2>/dev/null || true
+          cd AnyKernel3
+          ZIP_NAME="E404-MI_PAD6-$(date +%y%m%d-%H%M).zip"
+          zip -r9 "../$ZIP_NAME" . -x ".git*"
+          cd ..
+          mv *.zip out/
+
+      - name: Upload Kernel
+        uses: actions/upload-artifact@v4
+        with:
+          name: E404-Pipa-Kernel
+          path: out/*.zip
+          if-no-files-found: error
